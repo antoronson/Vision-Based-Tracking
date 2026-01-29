@@ -275,6 +275,17 @@ function sysCall_thread()
             dropIndex = 1
         end
         droppedPartsCnt = droppedPartsCnt + 1
+        --------------------------------------
+        -- Adding Path back to home after 
+        -- every successful placement
+        --------------------------------------
+        local pathBackHome = findPath(initConf)
+        if pathBackHome then
+            print('Found a path from the current config back to the home config!')
+            followPath(pathBackHome)
+        else
+            error('Failed finding a path from the current config back to the home config. Try increasing the search times.')
+        end
     end
 
     local pathBackHome = findPath(initConf)
