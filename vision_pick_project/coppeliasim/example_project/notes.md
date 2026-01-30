@@ -41,3 +41,7 @@ Informal notes documenting experiments, decisions and observations and open ques
     - IK Solver solves for the config and this is isolated from the motion planner.  
     - By combining IKSolver and MotionPlanner, this issue could be fixed. 
 
+
+##### 30.01.2026:
+- The **findPath** function was included in the config validation. After this, it was teratively searching for the right position and path. 
+- Although this is solving this delays the process. 

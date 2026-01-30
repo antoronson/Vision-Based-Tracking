@@ -101,7 +101,21 @@ function selectOneValidConfig(configs, approachIkTr, withdrawIkTr)
                     target = nil
                 end
             end
-        
+            ------------------------------------------
+            -- check if ompl can find path to target
+            ------------------------------------------
+            if target then
+                print("Found valid config at ", i)
+                setConfig(bufferedConfig)
+                local check_path = findPath(target)
+                if check_path then
+                    print("OMPL validated config ", i)
+                    -- do nothing
+                else
+                    target = nil
+                end
+            end
+            
             if target then
                 retVal = target
                 local list = sim.getObjectsInTree(params.robotBase, sim.sceneobject_shape)
@@ -276,16 +290,17 @@ function sysCall_thread()
         end
         droppedPartsCnt = droppedPartsCnt + 1
         --------------------------------------
-        -- Adding Path back to home after 
-        -- every successful placement
+        -- We donot move back to home as we
+        -- already added path check in the 
+        -- check config
         --------------------------------------
-        local pathBackHome = findPath(initConf)
-        if pathBackHome then
-            print('Found a path from the current config back to the home config!')
-            followPath(pathBackHome)
-        else
-            error('Failed finding a path from the current config back to the home config. Try increasing the search times.')
-        end
+            --local pathBackHome = findPath(initConf)
+        --if pathBackHome then
+          --  print('Found a path from the current config back to the home config!')
+            --followPath(pathBackHome)
+        --else
+          --  error('Failed finding a path from the current config back to the home config. Try increasing the search times.')
+        --end
     end
 
     local pathBackHome = findPath(initConf)
