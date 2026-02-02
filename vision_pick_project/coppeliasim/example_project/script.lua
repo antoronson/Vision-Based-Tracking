@@ -69,7 +69,7 @@ function selectOneValidConfig(configs, approachIkTr, withdrawIkTr)
                 end
                 local path = simIK.generatePath(ikEnv, ikGroup, ikJoints, simToIk[params.robotTip], 4)
                 simIK.eraseEnvironment(ikEnv)
-                if path then
+                if path and (#path > 0)then
                     path = Matrix(#path // 6, 6, path):totable()
                     if collides(path) then
                         target = nil
@@ -110,6 +110,8 @@ function selectOneValidConfig(configs, approachIkTr, withdrawIkTr)
                 local check_path = findPath(target)
                 if check_path then
                     print("OMPL validated config ", i)
+                    setConfig (target)
+                    -- sim.setObjectPose(params.robotTarget, targetPose)
                     -- do nothing
                 else
                     target = nil
@@ -274,12 +276,26 @@ function sysCall_thread()
 
     local initConf = getConfig() -- Init joint pose
     local dropIndex = 1
-    local pickPose = sim.getObjectPose(sim.getObject('/pickPose'))
+    
+    -------------------------
+    -- Define Pick Position
+    -------------------------
+    local pickPose = {}
+    for i = 1,2 do
+        pickPose[i] = sim.getObjectPose(sim.getObject('/pickPose', {index = (i-1)}))
+    end
+    
     local droppedPartsCnt = 0
     setGripperData(true)
     sim.wait(1.0) -- wait a bit until the gripper is fully open
     while sim.checkProximitySensor(params.conveyorSensor, sim.handle_all) == 1 do
-        local cube = pickPart(pickPose, {-0.105, 0, 0, 0, 0, 0, 1}, {0.105, 0, -0.1, 0, 0, 0, 1})
+        for i = 1,2 do
+            local cube = pickPart(pickPose[i], {-0.105, 0, 0, 0, 0, 0, 1}, {0.105, 0, -0.1, 0, 0, 0, 1})
+            if (cube) then
+                break
+            end
+        end
+        
         local dropPose = dropPoses[dropIndex]
         local pose = table.clone(dropPose)
         local dropApproachIkTr = {-0.18 + 0.05 * (droppedPartsCnt // 2), 0, 0, 0, 0, 0, 1}
@@ -319,7 +335,13 @@ function pickPart(pickPose, approachIkTr, withdrawIkTr)
         print(string.format('Found %i different configs corresponding to the desired pick pose. Now selecting an appropriate valid config...', #configs))
         local pickConfig, passiveVizShape = selectOneValidConfig(configs, approachIkTr, withdrawIkTr) -- select the closest config to current config
         sim.step() -- to make the passiveVizShape immediately visible
-        print('Selected following pick config: ', (Vector(pickConfig) * 180.0 / math.pi):data())
+        if not pickConfig then
+            print ('No Valid Pick config found')
+            return nil
+        else
+            print('Selected following pick config: ', (Vector(pickConfig) * 180.0 / math.pi):data())
+            --break
+        end
         
         local path = findPath(pickConfig)
         if path then

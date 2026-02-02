@@ -45,3 +45,9 @@ Informal notes documenting experiments, decisions and observations and open ques
 ##### 30.01.2026:
 - The **findPath** function was included in the config validation. After this, it was teratively searching for the right position and path. 
 - Although this is solving this delays the process. 
+
+##### 02.02.2026:
+- Two grasping points were added for pickup and a collision zone was also added to the model as stated in the image
+![Visualization of Experiment space](images_md/Robot_WorkSpace.png)
+- During the execution sometimes the robot cannot reach either position due to collison during the return movement / collision with the pick position. 
+- Therefore application of AI tools  (**Grasp Quality CNN**)will be investigated here
